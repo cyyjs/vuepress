@@ -1,108 +1,72 @@
 {
-  "name": "vuepress",
-  "version": "0.8.4",
+  "private": true,
   "description": "Minimalistic doc generator with Vue component based layout system",
-  "main": "lib/index.js",
-  "bin": {
-    "vuepress": "bin/vuepress.js"
-  },
-  "scripts": {
-    "dev": "node bin/vuepress dev docs",
-    "build": "node bin/vuepress build docs",
-    "lint": "eslint --fix --ext .js,.vue bin/ lib/ test/",
-    "prepublishOnly": "conventional-changelog -p angular -r 2 -i CHANGELOG.md -s"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/vuejs/vuepress.git"
-  },
-  "keywords": [
-    "documentation",
-    "vue",
-    "generator"
+  "workspaces": [
+    "packages/@vuepress/*",
+    "packages/vuepress",
+    "packages/docs"
   ],
-  "author": "Evan You",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/vuejs/vuepress/issues"
+  "scripts": {
+    "boot": "node scripts/bootstrap.js",
+    "build": "yarn tsc && yarn build:docs",
+    "build:docs": "yarn workspace docs build",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 2",
+    "clean": "lerna clean && rm -rf node_modules",
+    "dev": "yarn tsc && yarn dev:docs",
+    "dev:docs": "yarn workspace docs dev",
+    "lint": "eslint packages --ext .js,.ts,.vue",
+    "packages:changed": "lerna changed",
+    "packages:diff": "lerna diff",
+    "packages:list": "lerna ls -l",
+    "register-vuepress": "lerna exec --scope vuepress -- yarn link",
+    "release": "yarn lint && yarn build && yarn test && node scripts/release.js",
+    "remote-version": "node scripts/remote-version.js",
+    "show-help": "yarn workspace docs show-help",
+    "test": "node scripts/test.js",
+    "tsc": "yarn workspace @vuepress/shared-utils tsc",
+    "unregister-vuepress": "lerna exec --scope vuepress -- yarn unlink",
+    "update-core-team": "all-contributors generate",
+    "view-info": "yarn tsc && yarn workspace docs view-info"
   },
-  "homepage": "https://github.com/vuejs/vuepress#readme",
-  "gitHooks": {
-    "pre-commit": "lint-staged"
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
   },
   "lint-staged": {
-    "*.{js,vue}": [
+    "*.{js,ts,vue}": [
       "eslint --fix",
+      "git add"
+    ],
+    "package.json": [
+      "sort-package-json",
       "git add"
     ]
   },
-  "dependencies": {
-    "autoprefixer": "^8.2.0",
-    "buble": "^0.19.3",
-    "buble-loader": "^0.5.0",
-    "chalk": "^2.3.2",
-    "chokidar": "^2.0.3",
-    "commander": "^2.15.1",
-    "connect-history-api-fallback": "^1.5.0",
-    "copy-webpack-plugin": "^4.5.1",
-    "css-loader": "^0.28.11",
-    "diacritics": "^1.3.0",
-    "docsearch.js": "^2.5.2",
-    "es6-promise": "^4.2.4",
-    "escape-html": "^1.0.3",
-    "file-loader": "^1.1.11",
-    "fs-extra": "^5.0.0",
-    "globby": "^8.0.1",
-    "gray-matter": "^4.0.1",
-    "js-yaml": "^3.11.0",
-    "koa-connect": "^2.0.1",
-    "koa-mount": "^3.0.0",
-    "koa-static": "^4.0.2",
-    "loader-utils": "^1.1.0",
-    "lru-cache": "^4.1.2",
-    "markdown-it": "^8.4.1",
-    "markdown-it-anchor": "^4.0.0",
-    "markdown-it-container": "^2.0.0",
-    "markdown-it-emoji": "^1.4.0",
-    "markdown-it-table-of-contents": "^0.3.3",
-    "mini-css-extract-plugin": "^0.4.0",
-    "nprogress": "^0.2.0",
-    "object-assign": "^4.1.1",
-    "optimize-css-assets-webpack-plugin": "^4.0.0",
-    "portfinder": "^1.0.13",
-    "postcss-loader": "^2.1.3",
-    "prismjs": "^1.13.0",
-    "register-service-worker": "^1.2.0",
-    "semver": "^5.5.0",
-    "stylus": "^0.54.5",
-    "stylus-loader": "^3.0.2",
-    "toml": "^2.3.3",
-    "url-loader": "^1.0.1",
-    "vue": "^2.5.16",
-    "vue-loader": "^15.0.0-rc.1",
-    "vue-router": "^3.0.1",
-    "vue-server-renderer": "^2.5.16",
-    "vue-template-compiler": "^2.5.16",
-    "vuepress-html-webpack-plugin": "^3.2.0",
-    "webpack": "^4.5.0",
-    "webpack-chain": "^4.6.0",
-    "webpack-merge": "^4.1.2",
-    "webpack-serve": "^0.3.1",
-    "webpackbar": "^2.6.1",
-    "workbox-build": "^3.1.0"
-  },
   "devDependencies": {
-    "conventional-changelog": "^1.1.23",
-    "eslint": "^4.19.1",
-    "eslint-plugin-vue-libs": "^3.0.0",
-    "lint-staged": "^7.0.4",
-    "vuepress-theme-vue": "^1.0.2",
-    "yorkie": "^1.0.3"
-  },
-  "engines": {
-    "node": ">=8"
-  },
-  "browserslist": [
-    ">1%"
-  ]
+    "@commitlint/cli": "^8.2.0",
+    "@commitlint/config-conventional": "^8.2.0",
+    "@types/escape-html": "^0.0.20",
+    "@types/fs-extra": "^5.0.4",
+    "@types/globby": "^9.1.0",
+    "@types/hash-sum": "^1.0.0",
+    "@types/lru-cache": "^5.1.0",
+    "@types/node": "^12.7.5",
+    "@types/semver": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^2.9.0",
+    "@typescript-eslint/parser": "^2.9.0",
+    "all-contributors-cli": "^6.9.1",
+    "conventional-changelog-cli": "^2.0.23",
+    "eslint": "^6.7.1",
+    "eslint-plugin-jest": "^23.0.5",
+    "eslint-plugin-vue-libs": "^4.0.0",
+    "husky": "^3.0.5",
+    "inquirer": "^7.0.0",
+    "lerna": "3.16.4",
+    "lint-staged": "^9.3.0",
+    "minimist": "^1.2.0",
+    "sort-package-json": "^1.24.0",
+    "typescript": "^3.6.3"
+  }
 }
